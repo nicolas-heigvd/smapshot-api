@@ -15,15 +15,34 @@ psql \
 
 echo "Role smapshot successfully created!"
 
-psql \
-  -U "${POSTGRES_USER}" \
-  -d "${POSTGRES_DB}" \
-  -f "/tmp/dump.sql"
-  #-v ON_ERROR_STOP=1 # this sanity check SHOULD be activated, but the dump is not clean.
+if [ "${PGRESTORE:-False}" = "True" ]
+then
+    echo "Restoring ${DUMP_FILE} into ${POSTGRES_DB} using pg_restore in progress..."
+    # Prepare array of arguments (sh compatible)
+    args="--format=c"
+    args="${args} --username=${POSTGRES_USER}"
+    args="${args} --dbname=${POSTGRES_DB}"
+    args="${args} --role=postgres"
+    args="${args} --no-privileges"
+    args="${args} --no-owner"
+    args="${args} --verbose"
+    args="${args} --exit-on-error"
+    if [ "${SCHEMA:-True}" = "True" ]; then
+        args="${args} --schema=public"
+    fi
+    args="${args} ${DUMP_FILE}"
+    pg_restore ${args}
+else
+    psql \
+      -U "${POSTGRES_USER}" \
+      -d "${POSTGRES_DB}" \
+      -f "/tmp/dump.sql"
+      #-v ON_ERROR_STOP=1 # this sanity check SHOULD be activated, but the dump is not clean.
+      #rm -rf "${DUMP_FILE}"
+fi
 
-#rm -rf "${DUMP_FILE}"
+echo "Dump ${DUMP_FILE} restored successfully!"
 
-echo "Dump ${DUMP_FILE} successfully restored!"
 
 echo "Creating default user..."
 psql \
