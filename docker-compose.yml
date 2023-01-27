@@ -44,11 +44,12 @@ services:
     image: postgis/postgis:13-3.1-alpine
     hostname: db
     environment:
-      POSTGRES_DB: smapshot_v2
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD:
+      PGRESTORE:
     ports:
-      # Expose the database on port 5432 of the host by default
+      # Expose the database on port 5434 of the host by default
       # (or $DB_PORT, if specified).
       - "${DB_PORT:-5434}:5432"
     restart: "no"
